@@ -2,11 +2,18 @@
 
 #include "Question.h"
 #include <vector>
+#include <memory>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <queue>
+#include <atomic>
+#include <string>
 
 class QuizGame {
 public:
     explicit QuizGame(std::vector<Question> questions);
-
+    ~QuizGame();
     void run();
 
 private:
@@ -18,14 +25,25 @@ private:
 
     std::vector<Question> questions_;
     int moneyWon_{0};
-    int lifelineAvailable_[2];
+    int lifelineAvailable_[2]{1,1};
 
     void printIntro() const;
     void printOutro() const;
     void printQuestion(const Question& q) const;
 
-    char readAnswerWithTimeout(const Question& q) const;
+    void startInputThread();
+    void stopInputThread();
+    void inputLoop();
+
+    bool popLineWithTimeout(const Question& q);
+
+    char readAnswerWithTimeout(const Question& q);
+
     LifelineResult useLifeline(Question& q);
 
-    struct InputState;
+    std::thread inputThread_;
+    std::mutex inputMtx_;
+    std::condition_variable inputCv_;
+    std::queue<std::string> inputQueue_;
+    std::atomic<bool> stop_{false};
 };

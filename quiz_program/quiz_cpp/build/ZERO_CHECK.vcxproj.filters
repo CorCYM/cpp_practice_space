@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\user\Desktop\cpp_practice_space\quiz_program\quiz_cpp\build\CMakeFiles\6a2ded2ece6d57b433101f416b750136\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{3187FF7D-1B57-3144-8889-C1FDCD356661}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -7,8 +7,8 @@
 struct Question {
     std::string text;
     std::array<std::string, 4> options{};
-    char correctOptions{'A'};
-    int timeoutSeconds{30}
+    char correctOption{'A'};
+    int timeoutSeconds{30};
     int prizeMoney{0};
 };
 

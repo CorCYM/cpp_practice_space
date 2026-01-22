@@ -1,45 +1,84 @@
 #include "QuizGame.h"
 
 #include <iostream>
-#include <thread>
-#include <mutex>
 #include <chrono>
-#include <memory>
 #include <cctype>
 #include <cstdlib>
 
-namespace {
-    constexpr const char* COLOR_END = "\033[0m";
-    constexpr const char* RED       = "\033[1;31m";
-    constexpr const char* GREEN     = "\033[1;32m";
-    constexpr const char* YELLOW    = "\033[1;33m";
-    constexpr const char* BLUE      = "\033[1;34m";
-    constexpr const char* PINK      = "\033[1;35m";
-    constexpr const char* AQUA      = "\033[1;36m";
 
-    struct Inputstate {
-        std::mutex mtx;
-        std::condition_variable cv;
-        bool answered{false};
-        std::string answer;
-    };
+constexpr const char* COLOR_END = "\033[0m";
+constexpr const char* RED       = "\033[1;31m";
+constexpr const char* GREEN     = "\033[1;32m";
+constexpr const char* YELLOW    = "\033[1;33m";
+constexpr const char* BLUE      = "\033[1;34m";
+constexpr const char* PINK      = "\033[1;35m";
+constexpr const char* AQUA      = "\033[1;36m";
 
-    void inputThreadFunc(std::shared_ptr<InputState> state) {
-        std::string line;
-        if (std::getline(std::cin, line)) {
-            std::unique_lock<std::mutex> lock(state->mtx);
-            state->answer = line;
-            state->answered = true;
-            lock.unlock();
-            state->cv.notify_one();
-        }
+/*
+struct QuizGame::InputState {
+    std::mutex mtx;
+    std::condition_variable cv;
+    bool answered{false};
+    std::string answer;
+};
+
+void QuizGame::inputThreadFunc(std::shared_ptr<InputState> state) {
+    std::string line;
+    if (std::getline(std::cin, line)) {
+        std::unique_lock<std::mutex> lock(state->mtx);
+        state->answer = line;
+        state->answered = true;
+        lock.unlock();
+        state->cv.notify_one();
     }
 }
+*/
 
 QuizGame::QuizGame(std::vector<Question> questions) : questions_(std::move(questions)) {
     lifelineAvailable_[0] = 1;
     lifelineAvailable_[1] = 1;
 }
+
+QuizGame::~QuizGame(){
+    stopInputThread();
+}
+
+void QuizGame::startInputThread() {
+    stop_ = false;
+    inputThread_ = std::thread(&QuizGame::inputLoop, this);
+}
+
+void QuizGame::stopInputThread() {
+    if (!inputThread_.joinable()) return;
+
+    stop_ = true;
+
+    inputCv_.notify_all();
+
+    inputThread_.join();
+}
+
+void QuizGame::inputLoop() {
+    std::string line;
+    while (!stop) {
+        if (!std::getline(std::cin, line)) {
+            break;
+        }
+
+        {
+            std::lock_guard<std::mutex> lock(inputMtx_);
+            inputQueue_.push(line);
+        }
+        inputCv_.notify_one();
+    }
+
+    inputCv_.notify_all();
+}
+
+bool QuizGame::popLineWithTimeout(int timeoutSeconds, std::string& outLine) {
+    
+}
+
 
 void QuizGame::printIntro() const {
     std::cout << "\n\n" << PINK << "\t\tLet's play Who Wants To Be A Millionaire!!!" << COLOR_END << "\n";
@@ -65,7 +104,7 @@ void QuizGame::printQuestion(const Question& q) const {
 
 char QuizGame::readAnswerWithTimeout(const Question& q) const {
     auto state = std::make_shared<InputState>();
-    std::thread inputThread(inputThreadFunc, state);
+    std::thread inputThread(&QuizGame::inputThreadFunc, state);
 
     char result = 0;
 
