@@ -1,3 +1,0 @@
-C:/Users/user/Desktop/cpp_practice_space/quiz_program/quiz_cpp/build/CMakeFiles/quiz_cpp.dir
-C:/Users/user/Desktop/cpp_practice_space/quiz_program/quiz_cpp/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/user/Desktop/cpp_practice_space/quiz_program/quiz_cpp/build/CMakeFiles/ZERO_CHECK.dir
