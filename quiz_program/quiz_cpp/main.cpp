@@ -8,7 +8,7 @@
 int main() {
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
-    auto questions = loadQuestions("questions.txt");
+    auto questions = loadQuestions("../questions.txt");
     if (questions.empty()) {
         std::cerr << "No questions loaded. Please check questions.txt format.\n";
         return 1;

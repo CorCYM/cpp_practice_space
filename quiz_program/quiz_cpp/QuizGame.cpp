@@ -60,7 +60,7 @@ void QuizGame::stopInputThread() {
 
 void QuizGame::inputLoop() {
     std::string line;
-    while (!stop) {
+    while (!stop_) {
         if (!std::getline(std::cin, line)) {
             break;
         }
@@ -76,12 +76,66 @@ void QuizGame::inputLoop() {
 }
 
 bool QuizGame::popLineWithTimeout(int timeoutSeconds, std::string& outLine) {
-    
+    std::unique_lock<std::mutex> lock(inputMtx_);
+
+    if (!inputQueue_.empty()) {
+        outLine = std::move(inputQueue_.front());
+        inputQueue_.pop();
+        return true;
+    }
+
+    auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(timeoutSeconds);
+
+    while (inputQueue_.empty() && !stop_) {
+        if (inputCv_.wait_until(lock, deadline) == std::cv_status::timeout) {
+            break;
+        }
+    }
+
+    if (!inputQueue_.empty()) {
+        outLine = std::move(inputQueue_.front());
+        inputQueue_.pop();
+        return true;
+    }
+
+    return false;
 }
 
+char QuizGame::readAnswerWithTimeout(const Question& q) {
+    std::string line;
+    bool ok = popLineWithTimeout(q.timeoutSeconds, line);
+
+    if (!ok) {
+        std::cout << "\n" << RED << "Time out!!!" << COLOR_END << "\n";
+        return 0;
+    }
+
+    /*
+    line = trim(line);
+    if (line.empty()) {
+        return 0;
+    }
+    char ch = static_cast<char>(std::toupper(static_cast<unsigned char>(line[0])));
+    */
+
+    auto pos = line.find_first_not_of(" \t\r\n");
+    if (pos == std::string::npos) {
+        return 0;
+    }
+
+    char ch = static_cast<char>(
+        std::toupper(static_cast<unsigned char>(line[pos]))
+    );
+
+    if (ch == 'A' || ch == 'B' || ch == 'C' || ch == 'D' || ch == 'L') {
+        return ch;
+    }
+
+    return 0;
+}
 
 void QuizGame::printIntro() const {
-    std::cout << "\n\n" << PINK << "\t\tLet's play Who Wants To Be A Millionaire!!!" << COLOR_END << "\n";
+    std::cout << "\n\n" << PINK << "\t\tLet's play Who Wants To Be A Quiz Champion" << COLOR_END << "\n";
 }
 
 void QuizGame::printOutro() const {
@@ -102,40 +156,6 @@ void QuizGame::printQuestion(const Question& q) const {
     std::cout << GREEN << "Enter your answer (A, B, C, or D) or L for lifeline: " << COLOR_END << std::flush;
 }
 
-char QuizGame::readAnswerWithTimeout(const Question& q) const {
-    auto state = std::make_shared<InputState>();
-    std::thread inputThread(&QuizGame::inputThreadFunc, state);
-
-    char result = 0;
-
-    {
-        std::unique_lock<std::mutex> lock(state->mtx);
-        auto timeout = std::chrono::seconds(q.timeoutSeconds);
-        auto deadline = std::chrono::steady_clock::now() + timeout;
-
-        while (!state->answered) {
-            if (state->cv.wait_until(lock, deadline) == std::cv_status::timeout) {
-                break;
-            }
-        }
-
-        if (state->answered && !state->answer.empty()) {
-            char ch = static_cast<char>(std::toupper(static_cast<unsigned char>(state->answer[0])));
-            if (ch == 'A' || ch == 'B' || ch == 'C' || ch == 'D' || ch == 'L') {
-                result = ch;
-            }
-        }
-    }
-
-    if (result == 0) {
-        std::cout << "\n" << RED << "Time out!!!!!" << COLOR_END << "\n";
-    }
-
-    inputThread.detach();
-
-    return result;
-}
-
 QuizGame::LifelineResult QuizGame::useLifeline(Question& q) {
     std::cout << "\n\n" << PINK << "Available Lifelines:" << COLOR_END;
     if (lifelineAvailable_[0]) {
@@ -147,13 +167,24 @@ QuizGame::LifelineResult QuizGame::useLifeline(Question& q) {
     std::cout << "\n" << PINK << "Choose a lifeline or 0 to return: " << COLOR_END << std::flush;
 
     std::string line;
-    if (!std::getline(std::cin, line)) {
+
+    if (!popLineWithTimeout(24*60*60, line)) {
         return LifelineResult::None;
     }
+
+    /*
+    line = trim(line);
     if (line.empty()) {
         return LifelineResult::None;
     }
-    char ch = line[0];
+    */
+
+    auto pos = line.find_first_not_of(" \t\r\n");
+    if (pos == std::string::npos) {
+        return LifelineResult::None;
+    }
+
+    char ch = line[pos];
 
     switch (ch) {
         case '1':
@@ -196,6 +227,8 @@ QuizGame::LifelineResult QuizGame::useLifeline(Question& q) {
 }
 
 void QuizGame::run() {
+    startInputThread();
+
     printIntro();
 
     for (Question& q : questions_) {
@@ -208,6 +241,7 @@ void QuizGame::run() {
             if (answer == 0) {
                 std::cout << "\n" << RED << "You failed to answer in time." << COLOR_END << "\n";
                 printOutro();
+                stopInputThread();
                 return;
             }
 
@@ -227,6 +261,7 @@ void QuizGame::run() {
             } else {
                 std::cout << "\n" << RED << "Wrong! Correct answer is " << q.correctOption << "." << COLOR_END << "\n";
                 printOutro();
+                stopInputThread();
                 return;
             }
             break;
@@ -237,5 +272,9 @@ void QuizGame::run() {
         }
     }
 
-    std::cout << "\n" << BLUE << "Congratulations! You finished all questions.\n" << "Your total winnings are: $ " << moneyWon_ << COLOR_END << "\n";
+    std::cout << "\n" << BLUE 
+            << "Congratulations! You finished all questions.\n" 
+            << "Your total winnings are: $ " << moneyWon_ << COLOR_END << "\n";
+
+    stopInputThread();
 }

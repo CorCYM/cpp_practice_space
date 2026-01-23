@@ -35,7 +35,7 @@ private:
     void stopInputThread();
     void inputLoop();
 
-    bool popLineWithTimeout(const Question& q);
+    bool popLineWithTimeout(int timeoutSeconds, std::string& outLine);
 
     char readAnswerWithTimeout(const Question& q);
 
