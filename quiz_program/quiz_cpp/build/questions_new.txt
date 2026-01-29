@@ -1,0 +1,200 @@
+What is the capital city of South Korea?
+Seoul
+Busan
+Incheon
+Daegu
+A
+30
+1000
+What is the capital city of Japan?
+Osaka
+Kyoto
+Tokyo
+Sapporo
+C
+30
+2000
+What is the capital city of the United States?
+New York City
+Washington, D.C.
+Los Angeles
+Chicago
+B
+30
+3000
+What is the capital city of the United Kingdom?
+Manchester
+Edinburgh
+London
+Birmingham
+C
+30
+5000
+What is the capital city of France?
+Marseille
+Lyon
+Paris
+Nice
+C
+30
+8000
+What is the capital city of Germany?
+Frankfurt
+Munich
+Berlin
+Hamburg
+C
+30
+12000
+What is the capital city of Italy?
+Milan
+Rome
+Naples
+Turin
+B
+30
+18000
+What is the capital city of Canada?
+Toronto
+Vancouver
+Ottawa
+Montreal
+C
+30
+25000
+What is the capital city of Australia?
+Sydney
+Canberra
+Melbourne
+Brisbane
+B
+30
+35000
+What is the capital city of Brazil?
+Rio de Janeiro
+Sao Paulo
+Brasilia
+Salvador
+C
+30
+50000
+What is the capital city of India?
+Mumbai
+New Delhi
+Bengaluru
+Kolkata
+B
+30
+70000
+What is the capital city of Turkey?
+Istanbul
+Izmir
+Ankara
+Bursa
+C
+30
+100000
+What is the capital city of Egypt?
+Alexandria
+Cairo
+Giza
+Luxor
+B
+30
+140000
+What is the capital city of South Africa?
+Johannesburg
+Cape Town
+Pretoria
+Durban
+C
+30
+200000
+What is the capital city of Mexico?
+Guadalajara
+Monterrey
+Mexico City
+Cancun
+C
+30
+280000
+What is the capital city of Argentina?
+Cordoba
+Rosario
+Buenos Aires
+Mendoza
+C
+30
+400000
+What is the capital city of Thailand?
+Chiang Mai
+Bangkok
+Phuket
+Pattaya
+B
+30
+600000
+What is the capital city of Vietnam?
+Ho Chi Minh City
+Da Nang
+Hanoi
+Hue
+C
+30
+900000
+What is the capital city of Saudi Arabia?
+Jeddah
+Mecca
+Riyadh
+Medina
+C
+30
+1300000
+What is the capital city of New Zealand?
+Auckland
+Christchurch
+Wellington
+Dunedin
+C
+30
+2000000
+What is the capital city of Switzerland?
+Geneva
+Zurich
+Bern
+Basel
+C
+30
+3000000
+What is the capital city of Morocco?
+Casablanca
+Marrakesh
+Rabat
+Fes
+C
+30
+4500000
+What is the capital city of Kazakhstan?
+Almaty
+Astana
+Shymkent
+Karaganda
+B
+30
+6500000
+What is the capital city of Sri Lanka?
+Kandy
+Galle
+Sri Jayawardenepura Kotte
+Jaffna
+C
+30
+8500000
+What is the capital city of Mongolia?
+Erdenet
+Darkhan
+Ulaanbaatar
+Choibalsan
+C
+30
+10000000

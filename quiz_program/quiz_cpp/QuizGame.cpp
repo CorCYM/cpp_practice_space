@@ -226,55 +226,105 @@ QuizGame::LifelineResult QuizGame::useLifeline(Question& q) {
     return LifelineResult::None;
 }
 
+bool QuizGame::askRetry() {
+    clearInputQueue();
+
+    std::cout << "\n" << PINK << "Retry? (y/n): " << COLOR_END << std::flush;
+
+    std::string line;
+    if (!popLineWithTimeout(24 * 60 * 60, line)) {
+        return false;
+    }
+
+    auto pos = line.find_first_not_of(" \t\r\n");
+    if (pos == std::string::npos) {
+        return false;
+    }
+
+    char ch = static_cast<char>(std::tolower(static_cast<unsigned char>(line[pos])));
+    return (ch == 'y');
+}
+
+void QuizGame::clearInputQueue() {
+    std::lock_guard<std::mutex> lock(inputMtx_);
+    std::queue<std::string> empty;
+    inputQueue_.swap(empty);
+}
+
 void QuizGame::run() {
     startInputThread();
-
     printIntro();
 
-    for (Question& q : questions_) {
-        bool skipThisQuestion = false;
+    while (true) {
+        moneyWon_ = 0;
+        lifelineAvailable_[0] = 1;
+        lifelineAvailable_[1] = 1;
 
-        while (true) {
-            printQuestion(q);
-            char answer = readAnswerWithTimeout(q);
+        auto questionsCopy = questions_;
 
-            if (answer == 0) {
-                std::cout << "\n" << RED << "You failed to answer in time." << COLOR_END << "\n";
-                printOutro();
-                stopInputThread();
-                return;
-            }
+        bool finishedNormally = true;
 
-            if (answer == 'L') {
-                LifelineResult lr = useLifeline(q);
-                if (lr == LifelineResult::SkipQuestion) {
-                    skipThisQuestion = true;
+        for (Question& q : questionsCopy) {
+            bool skipThisQuestion = false;
+
+            while (true) {
+
+                printQuestion(q);
+                char answer = readAnswerWithTimeout(q);
+
+                if (answer == 0) {
+                    std::cout << "\n" << RED << "You failed to answer in time." << COLOR_END << "\n";
+                    printOutro();
+                    //stopInputThread();
+                    finishedNormally = false;
                     break;
                 }
-                continue;
-            }
 
-            if (answer == q.correctOption) {
-                std::cout << "\n" << GREEN << "Correct!" << COLOR_END << "\n";
-                moneyWon_ = q.prizeMoney;
-                std::cout << BLUE << "You have won: $ " << moneyWon_ << COLOR_END << "\n";
-            } else {
-                std::cout << "\n" << RED << "Wrong! Correct answer is " << q.correctOption << "." << COLOR_END << "\n";
-                printOutro();
-                stopInputThread();
-                return;
+                if (answer == 'L') {
+                    LifelineResult lr = useLifeline(q);
+                    if (lr == LifelineResult::SkipQuestion) {
+                        skipThisQuestion = true;
+                        break;
+                    }
+                    continue;
+                }
+
+                if (answer == q.correctOption) {
+                    std::cout << "\n" << GREEN << "Correct!" << COLOR_END << "\n";
+                    moneyWon_ = q.prizeMoney;
+                    std::cout << BLUE << "You have won: $ " << moneyWon_ << COLOR_END << "\n";
+                } else {
+                    std::cout << "\n" << RED << "Wrong! Correct answer is " << q.correctOption << "." << COLOR_END << "\n";
+                    printOutro();
+                    //stopInputThread();
+                    //return;
+                    finishedNormally = false;
+                }
+                break;
             }
+        
+
+            if (!finishedNormally) break;
+            if (skipThisQuestion) continue;
+
+        }
+
+        if (finishedNormally) {
+            std::cout << "\n" << BLUE
+                      << "Congratulations! You finished all questions.\n"
+                      << "Your total winnings are: $ " << moneyWon_
+                      << COLOR_END << "\n";
+        }
+
+        if (!askRetry()) {
+            std::cout << "\n" << YELLOW << "Exiting... Press Enter to close." << COLOR_END << "\n";
             break;
         }
 
-        if (skipThisQuestion) {
-            continue;
-        }
-    }
+        std::cout << "\n" << YELLOW << "Restarting...\n" << COLOR_END;
 
-    std::cout << "\n" << BLUE 
-            << "Congratulations! You finished all questions.\n" 
-            << "Your total winnings are: $ " << moneyWon_ << COLOR_END << "\n";
+        clearInputQueue();
+    }
 
     stopInputThread();
 }

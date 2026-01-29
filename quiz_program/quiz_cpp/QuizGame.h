@@ -37,7 +37,11 @@ private:
 
     bool popLineWithTimeout(int timeoutSeconds, std::string& outLine);
 
+    void clearInputQueue();
+
     char readAnswerWithTimeout(const Question& q);
+
+    bool askRetry();
 
     LifelineResult useLifeline(Question& q);
 

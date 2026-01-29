@@ -12,4 +12,4 @@ add_executable(quiz_cpp
     QuizGame.cpp
 )
 
-configure_file(questions.txt questions.txt COPYONLY)
+configure_file(questions.txt questions_new.txt COPYONLY)
