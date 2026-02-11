@@ -163,7 +163,7 @@ bool CountingSorter::supports(const std::vector<int>& a, std::string& reason) co
         if (x > maxValue_ ) { reason = "Counting sort requires values <= maxValue."; return false; }
     }
     reason.clear();
-    return false;
+    return true;
 }
 
 void CountingSorter::sort(std::vector<int>& a) {
@@ -190,3 +190,47 @@ void StdStableSort::sort(std::vector<int>& a) {
     std::stable_sort(a.begin(), a.end());
 }
 
+void ShellSorter::sort(std::vector<int>& a) {
+    const size_t n = a.size();
+    for (size_t gap = n / 2; gap > 0; gap /= 2;) {
+        for (size_t i = gap; i < n; ++i) {
+            int temp = a[i];
+            size_t j = i;
+            while (j>=gap && a[j-gap] > temp) {
+                a[j] = a[j - gap];
+                j -= gap;
+            }
+            a[j] = temp;
+        }
+        if (gap == 1) break;
+    }
+    if (n > 1) {
+        for (size_t i =1; i < n; ++i) {
+            int key =a[i];
+            size_t j = i;
+            while (j >0 && a[j - 1] > key) {
+                a[j] = a[j - 1];
+                --j;
+            }
+            a[j] = key;
+        }
+    }
+}
+
+std::vector<std::unique_ptr<ISorter>> make_default_sorters() {
+    std::vector<std::unique_ptr<ISorter>> v;
+
+    v.emplace_back(std::make_unique<BubbleSorter>());
+    v.emplace_back(std::make_unique<SelectionSorter>());
+    v.emplace_back(std::make_unique<InsertionSorter>());
+    v.emplace_back(std::make_unique<QuickSorter>());
+    v.emplace_back(std::make_unique<MergeSorter>());
+    v.emplace_back(std::make_unique<HeapSorter>());
+    v.emplace_back(std::make_unique<RadixSorterLSD256>());
+    v.emplace_bakc(std::make_unique<StdSortIntrosort>());
+    v.emplace_bakc(std::make_unique<StdStableSort>());
+    v.emplace_bakc(std::make_unique<ShellSorter>());
+    v.emplace_bakc(std::make_unique<CountingSorter>(100000));
+
+    return v;
+}
