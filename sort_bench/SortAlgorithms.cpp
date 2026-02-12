@@ -29,9 +29,22 @@ void SelectionSorter::sort(std::vector<int>& a) {
     }
 }
 
+void InsertionSorter::sort(std::vector<int>& a) {
+    const size_t n = a.size();
+    for (size_t i = 1; i < n; ++i) {
+        int key = a[i];
+        size_t j = i;
+        while (j > 0 && a[j-1] > key) {
+            a[j] = a[j-1];
+            --j;
+        }
+        a[j] = key;
+    }
+}
+
 static int median_of_three(int x, int y, int z) {
     if ((x <= y && y <= z) || (z <= y && y <= x)) return y;
-    if ((y <= z && x <= z) || (z <= x && x <= y)) return x;
+    if ((y <= x && x <= z) || (z <= x && x <= y)) return x;
     return z;
 }
 
@@ -40,7 +53,7 @@ static void quick_sort_impl(std::vector<int>& a, int lo, int hi) {
         int mid = lo + (hi - lo) / 2;
         int pivot = median_of_three(a[lo], a[mid], a[hi]);
 
-        int i = lo, 
+        int i = lo;
         int j = hi;
 
         while (i <= j) {
@@ -110,7 +123,7 @@ void MergeSorter::sort(std::vector<int>& a) {
 
 void HeapSorter::sort(std::vector<int>& a) {
     std::make_heap(a.begin(), a.end());
-    std::sort_heap(a.begin(), a,end());
+    std::sort_heap(a.begin(), a.end());
 }
 
 bool RadixSorterLSD256::supports(const std::vector<int>& a, std::string& reason) const {
@@ -150,7 +163,7 @@ void RadixSorterLSD256::sort(std::vector<int>& a) {
 
         for (int i = static_cast<int>(a.size()) - 1; i >= 0; --i) {
             int x = a[i];
-            int digit = (x >> shift) && 0xFF;
+            int digit = (x >> shift) & 0xFF;
             out[--cnt[digit]] = x;
         }
         a.swap(out);
@@ -174,7 +187,7 @@ void CountingSorter::sort(std::vector<int>& a) {
     }
 
     size_t idx = 0;
-    for (int v = 0; v <=maxValue_;, ++v) {
+    for (int v = 0; v <= maxValue_; ++v) {
         int c = cnt[static_cast<size_t>(v)];
         while (c--) {
             a[idx++] = v;
@@ -192,7 +205,7 @@ void StdStableSort::sort(std::vector<int>& a) {
 
 void ShellSorter::sort(std::vector<int>& a) {
     const size_t n = a.size();
-    for (size_t gap = n / 2; gap > 0; gap /= 2;) {
+    for (size_t gap = n / 2; gap > 0; gap /= 2) {
         for (size_t i = gap; i < n; ++i) {
             int temp = a[i];
             size_t j = i;
@@ -204,16 +217,15 @@ void ShellSorter::sort(std::vector<int>& a) {
         }
         if (gap == 1) break;
     }
-    if (n > 1) {
-        for (size_t i =1; i < n; ++i) {
-            int key =a[i];
-            size_t j = i;
-            while (j >0 && a[j - 1] > key) {
-                a[j] = a[j - 1];
-                --j;
-            }
-            a[j] = key;
+
+    for (size_t i =1; i < n; ++i) {
+        int key =a[i];
+        size_t j = i;
+        while (j >0 && a[j - 1] > key) {
+            a[j] = a[j - 1];
+            --j;
         }
+        a[j] = key;
     }
 }
 
@@ -227,10 +239,10 @@ std::vector<std::unique_ptr<ISorter>> make_default_sorters() {
     v.emplace_back(std::make_unique<MergeSorter>());
     v.emplace_back(std::make_unique<HeapSorter>());
     v.emplace_back(std::make_unique<RadixSorterLSD256>());
-    v.emplace_bakc(std::make_unique<StdSortIntrosort>());
-    v.emplace_bakc(std::make_unique<StdStableSort>());
-    v.emplace_bakc(std::make_unique<ShellSorter>());
-    v.emplace_bakc(std::make_unique<CountingSorter>(100000));
+    v.emplace_back(std::make_unique<StdSortIntrosort>());
+    v.emplace_back(std::make_unique<StdStableSort>());
+    v.emplace_back(std::make_unique<ShellSorter>());
+    v.emplace_back(std::make_unique<CountingSorter>(1000000));
 
     return v;
 }

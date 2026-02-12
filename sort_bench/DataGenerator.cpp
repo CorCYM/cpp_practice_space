@@ -1,4 +1,4 @@
-#include "DataGenerator.cpp"
+#include "DataGenerator.h"
 #include <algorithm>
 
 DataGenerator::DataGenerator(DataGenConfig cfg) : cfg_(cfg) {}

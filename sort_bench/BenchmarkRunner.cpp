@@ -27,7 +27,7 @@ std::vector<BenchResult> BenchmarkRunner::run(
         r.algo = s->name();
 
         const bool isN2 = (r.algo == "Bubble" || r.algo == "Selection" || r.algo == "Insertion");
-        if (isNa2 && static_cast<int>(data.size()) > cfg_.n2Cutoff) {
+        if (isN2 && static_cast<int>(data.size()) > cfg_.n2Cutoff) {
             r.ok = true;
             r.note = "SKIPPED (too slow for large N)";
             out.push_back(r);
@@ -43,7 +43,7 @@ std::vector<BenchResult> BenchmarkRunner::run(
         }
 
         double totalMs = 0.0;
-        uint64_t lastChk = 0
+        uint64_t lastChk = 0;
         bool allOk = true;
 
         for (int t = 0; t < cfg_.repeats; ++t) {
@@ -59,16 +59,16 @@ std::vector<BenchResult> BenchmarkRunner::run(
             lastChk = checksum(a);
         }
 
-        r.argMs = totalMs / cfg_.repeats;
+        r.avgMs = totalMs / cfg_.repeats;
         r.ok = allOk;
         r.chk = lastChk;
 
         out.push_back(r);
     }
 
-    std::stable_sort(out.begin(), out.end(), [](const BenchResult& a, const BenchResult& b)) {
+    std::stable_sort(out.begin(), out.end(), [](const BenchResult& a, const BenchResult& b) {
         const bool aSkip = !a.note.empty();
-        const bool bSkip = !a.note.empty();
+        const bool bSkip = !b.note.empty();
         if (aSkip != bSkip) {
             return !aSkip;
         }
@@ -76,7 +76,7 @@ std::vector<BenchResult> BenchmarkRunner::run(
             return a.algo < b.algo;
         }
         return a.avgMs < b.avgMs;
-    }
-    
+    });
+
     return out;
 }

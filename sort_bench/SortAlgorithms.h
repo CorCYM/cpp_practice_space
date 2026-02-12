@@ -42,8 +42,8 @@ public:
 class RadixSorterLSD256 final : public ISorter {
 public:
     std::string name() const override { return "Radix"; }
-    bool support(const std::vector<int>& a, std::string& reason) const override;
-    void sort(std::vector<int&> a) override;
+    bool supports(const std::vector<int>& a, std::string& reason) const override;
+    void sort(std::vector<int>& a) override;
 };
 
 class CountingSorter final : public ISorter {
@@ -66,7 +66,7 @@ public:
 
 class StdStableSort final : public ISorter {
 public:
-    std::string name() const override { return "std::stable_sort" }
+    std::string name() const override { return "std::stable_sort"; }
     void sort(std::vector<int>& a) override;
 };
 

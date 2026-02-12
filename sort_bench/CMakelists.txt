@@ -1,0 +1,24 @@
+cmake_minimum_required(VERSION 3.16)
+
+project(sort_bench LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+add_executable(sort_bench
+    main.cpp
+    SortAlgorithms.cpp
+    DataGenerator.cpp
+    BenchmarkRunner.cpp
+    Report.cpp
+)
+
+target_include_directories(sort_bench PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+# 컴파일 옵션(컴파일러별)
+if (MSVC)
+    target_compile_options(sort_bench PRIVATE /W4 /permissive-)
+else()
+    target_compile_options(sort_bench PRIVATE -Wall -Wextra -Wpedantic)
+endif()

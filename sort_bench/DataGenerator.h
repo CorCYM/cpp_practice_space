@@ -24,4 +24,4 @@ public:
 
 private:
     DataGenConfig cfg_;
-}
+};

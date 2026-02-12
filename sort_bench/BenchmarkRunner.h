@@ -12,7 +12,7 @@ struct BenchConfig {
 
 struct BenchResult {
     std::string algo;
-    double avgMs = 0.0
+    double avgMs = 0.0;
     bool ok = false;
     uint64_t chk = 0;
     std::string note;
